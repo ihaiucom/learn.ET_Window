@@ -1,4 +1,6 @@
-﻿namespace ETModel
+﻿using System.Collections.Generic;
+
+namespace ETModel
 {
 	public static class ObjectHelper
 	{
@@ -8,5 +10,14 @@
 			t1 = t2;
 			t2 = t3;
 		}
-	}
+
+
+        public static void SwapQueue<T>(Queue<T> src, Queue<T> target)
+        {
+            while(src.Count > 0)
+            {
+                target.Enqueue(src.Dequeue());
+            }
+        }
+    }
 }

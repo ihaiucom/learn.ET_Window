@@ -9,6 +9,7 @@ namespace ETHotfix
 		{
 			try
 			{
+                UnityEngine.Debug.Log("ETHotfix.Init.Start()");
 				Game.Scene.ModelScene = ETModel.Game.Scene;
 
 				// 注册热更层回调
