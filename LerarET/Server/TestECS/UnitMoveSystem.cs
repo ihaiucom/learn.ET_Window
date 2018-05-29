@@ -31,20 +31,25 @@ namespace TestECS
         private Type unitCompoentType = typeof(UnitMoveComponent);
 
 
-        private List<Component> updates = new List<Component>();
+        private Queue<long> updates = new Queue<long>();
         public void Update()
         {
-            List<Component> queue = Stage.GetUnitCompoents(unitCompoentType);
+            Stage stage = this.Stage;
+            Queue<long> queue = stage.GetUnitCompoents(unitCompoentType);
 
             if (queue == null) return;
 
             while(queue.Count > 0)
             {
-                UnitMoveComponent instance = (UnitMoveComponent)queue[0];
-                queue.RemoveAt(0);
+                long unitId = queue.Dequeue();
+
+                UnitMoveComponent instance = stage.GetUnitCompoent<UnitMoveComponent>(unitId, unitCompoentType);
+                if (instance == null)
+                    continue;
+
+                updates.Enqueue(unitId);
 
                 Log.Info($"UnitMoveSystem.Update: StageName={Stage.StageName} Unit.Name={instance.Unit.Name} ");
-                updates.Add(instance);
             }
 
             Stage.SwapUnitCompoents(unitCompoentType, ref updates);

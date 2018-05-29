@@ -41,13 +41,12 @@ namespace TestECS
             unit.AddComponent<UnitMoveComponent>();
             stage1.AddUnit(unit);
 
+            willRemove = unit;
 
 
             unit = ComponentFactory.Create<Unit, string>("单位B1");
             unit.AddComponent<UnitMoveComponent>();
             stage2.AddUnit(unit);
-
-            willRemove = stage1;
 
 
             while (true)
@@ -61,6 +60,14 @@ namespace TestECS
                     {
                         willRemove.Dispose();
                         willRemove = null;
+
+                        unit = ComponentFactory.CreateWithParent<Unit, string>(stage1, "单位A11");
+                        unit.AddComponent<UnitMoveComponent>();
+                        stage1.AddUnit(unit);
+
+                        unit = ComponentFactory.CreateWithParent<Unit, string>(stage1, "单位A12");
+                        unit.AddComponent<UnitMoveComponent>();
+                        stage1.AddUnit(unit);
                     }
 
                     Log.Info("--------------------");

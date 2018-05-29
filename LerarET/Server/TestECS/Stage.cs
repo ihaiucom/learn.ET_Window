@@ -23,7 +23,7 @@ namespace TestECS
 
         private readonly Dictionary<long, Unit> allUnits = new Dictionary<long, Unit>();
 
-        private readonly Dictionary<Type, List<Component>> allUnitCompoents = new Dictionary<Type, List<Component>>();
+        private readonly Dictionary<Type, Queue<long>> allUnitCompoents = new Dictionary<Type, Queue<long>>();
 
 
         public void Awake(ulong stageId, string stageName)
@@ -36,6 +36,11 @@ namespace TestECS
 
         public void AddUnit(Unit unit)
         {
+            if(allUnits.ContainsKey(unit.Id))
+            {
+                throw new Exception($"该场景已存在该ID的单位 {unit.Id}");
+            }
+
             if(unit.Parent != null && unit.Parent != this)
             {
                 throw new Exception("该单位没有从之前关卡移除");
@@ -46,7 +51,7 @@ namespace TestECS
             }
 
             Component[] components = unit.GetComponents();
-            List<Component> list;
+            Queue<long> list;
             foreach (Component component in components)
             {
                 Type type = component.GetType();
@@ -57,10 +62,10 @@ namespace TestECS
                 }
                 else
                 {
-                    list = allUnitCompoents[type] = new List<Component>();
+                    list = allUnitCompoents[type] = new Queue<long>();
                 }
 
-                list.Add(component);
+                list.Enqueue(unit.Id);
             }
 
             allUnits.Add(unit.Id, unit);
@@ -70,20 +75,6 @@ namespace TestECS
         {
             if(allUnits.ContainsKey(unit.Id))
             {
-                Component[] components = unit.GetComponents();
-                List<Component> list;
-                foreach (Component component in components)
-                {
-                    Type type = component.GetType();
-
-                    if (allUnitCompoents.ContainsKey(type))
-                    {
-                        list = allUnitCompoents[type];
-                        list.Remove(component);
-                    }
-
-                }
-
                 allUnits.Remove(unit.Id);
             }
         }
@@ -94,12 +85,32 @@ namespace TestECS
         }
 
 
-        public Component[] GetUnits()
+        public Unit[] GetUnits()
         {
             return this.allUnits.Values.ToArray();
         }
 
-        public List<Component> GetUnitCompoents<T>()
+
+        public T GetUnitCompoent<T>(long unitId) where T : Component
+        {
+            if(allUnits.ContainsKey(unitId))
+            {
+                return allUnits[unitId].GetComponent<T>();
+            }
+            return default(T);
+        }
+
+
+        public T GetUnitCompoent<T>(long unitId, Type type) where T : Component
+        {
+            if (allUnits.ContainsKey(unitId))
+            {
+                return (T) allUnits[unitId].GetComponent(type);
+            }
+            return default(T);
+        }
+
+        public Queue<long> GetUnitCompoents<T>()
         {
             Type type = typeof(T);
             
@@ -107,15 +118,15 @@ namespace TestECS
         }
 
 
-        public List<Component> GetUnitCompoents(Type type)
+        public Queue<long> GetUnitCompoents(Type type)
         {
             return allUnitCompoents.ContainsKey(type) ? allUnitCompoents[type] : null;
         }
 
 
-        public List<Component> SwapUnitCompoents(Type type, ref List<Component> queue)
+        public Queue<long> SwapUnitCompoents(Type type, ref Queue<long> queue)
         {
-            List<Component> t = allUnitCompoents[type];
+            Queue<long> t = allUnitCompoents[type];
             allUnitCompoents[type] = queue;
             queue = t;
             return t;

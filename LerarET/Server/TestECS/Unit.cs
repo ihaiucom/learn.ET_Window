@@ -29,6 +29,10 @@ namespace TestECS
         public void Awake(string name)
         {
             this.Name = name;
+            if(this.Id == 0)
+            {
+                this.Id = this.InstanceId;
+            }
         }
 
         public override void Dispose()
@@ -43,6 +47,7 @@ namespace TestECS
             this.Parent = null;
 
             base.Dispose();
+            this.Id = 0;
 
         }
 
